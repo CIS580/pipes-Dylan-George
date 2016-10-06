@@ -202,7 +202,7 @@ masterLoop(performance.now());
  * the number of milliseconds passed since the last frame.
  */
 function update(elapsedTime) {
-	console.log(board[fluid.index].pipe);
+
 	if(fluid.direction == "up") 
 	{
 		fluid.y -= fluid.speed * elapsedTime;
@@ -260,20 +260,60 @@ function update(elapsedTime) {
 		switch(board[fluid.index].pipe)
 		{
 			case 4:
-				if(fluid.direction == "up") fluid.direction = "right";
-				else fluid.direction = "down";
+				if(fluid.direction == "up")
+				{
+					fluid.direction = "right";
+					fluid.turns.push({x: fluid.x-10, y: fluid.y});
+					fluid.turnIndex++;
+				}			
+				else if(fluid.direction == "left")
+				{
+					fluid.direction = "down";				
+					fluid.turns.push({x: fluid.x, y: fluid.y-10});
+					fluid.turnIndex++;
+				}
 				break;
 			case 5:
-				if(fluid.direction == "up") fluid.direction = "left";
-				else fluid.direction = "down";
+				if(fluid.direction == "up")
+				{
+					fluid.direction = "left";
+					fluid.turns.push({x: fluid.x+10, y: fluid.y});
+					fluid.turnIndex++;
+				}			
+				else if(fluid.direction == "right")
+				{
+					fluid.direction = "down";				
+					fluid.turns.push({x: fluid.x, y: fluid.y-10});
+					fluid.turnIndex++;
+				}
 				break;
 			case 6: 
-				if(fluid.direction == "down") fluid.direction = "left";
-				else fluid.direction = "up";
+				if(fluid.direction == "down")
+				{
+					fluid.direction = "left";
+					fluid.turns.push({x: fluid.x+10, y: fluid.y});
+					fluid.turnIndex++;
+				}			
+				else if(fluid.direction == "right")
+				{
+					fluid.direction = "up";				
+					fluid.turns.push({x: fluid.x, y: fluid.y+10});
+					fluid.turnIndex++;
+				}
 				break;
 			case 7:
-				if(fluid.direction == "down") fluid.direction = "right";
-				else fluid.direction = "up";
+				if(fluid.direction == "down")
+				{
+					fluid.direction = "right";
+					fluid.turns.push({x: fluid.x-10, y: fluid.y});
+					fluid.turnIndex++;
+				}			
+				else if(fluid.direction == "left")
+				{
+					fluid.direction = "up";				
+					fluid.turns.push({x: fluid.x, y: fluid.y+10});
+					fluid.turnIndex++;
+				}
 				break;
 			case 8:
 				if(fluid.direction == "up")
@@ -323,15 +363,30 @@ function update(elapsedTime) {
 			case 11:
 				if(fluid.direction == "left")
 				{
-					var b = board[fluid.index + 9].pipe;
-					var a = board[fluid.index - 9].pipe;
-					if(b == pipeList.empty && a != pipeList.empty) fluid.direction = "up";
-					else if(a == pipeList.empty && b != pipeList.empty) fluid.direction = "down";
+					if(!board[fluid.index + 9])
+					{
+						fluid.direction = "up";
+						fluid.turns.push({x: fluid.x, y: fluid.y+10});
+						fluid.turnIndex++;
+					}
+					else if(!board[fluid.index - 9]) 
+					{
+						fluid.direction = "down";
+						fluid.turns.push({x: fluid.x, y: fluid.y-10});
+						fluid.turnIndex++;
+					}
 					else
 					{
-						var rand = Math.floor(Math.random()*2) + 1;
-						if(rand == 1) fluid.direction = "up";
-						else fluid.direction = "down";
+						var b = board[fluid.index + 9].pipe;
+						var a = board[fluid.index - 9].pipe;
+						if(b == pipeList.empty && a != pipeList.empty) fluid.direction = "up";
+						else if(a == pipeList.empty && b != pipeList.empty) fluid.direction = "down";
+						else
+						{
+							var rand = Math.floor(Math.random()*2) + 1;
+							if(rand == 1) fluid.direction = "up";
+							else fluid.direction = "down";
+						}
 					}
 				}
 				break;
@@ -354,14 +409,20 @@ function render(elapsedTime, ctx) {
 	
 	//Render the fluid
 	ctx.fillStyle = "lightgreen";
-	ctx.arc(fluid.x, fluid.y, 10, 0, 2*Math.PI);
-	ctx.fill();
+
 	ctx.moveTo(fluid.turns[fluid.turnIndex].x, fluid.turns[fluid.turnIndex].y);
-	ctx.lineWidth = 10;
+	ctx.lineWidth = 20;
 	ctx.lineTo(fluid.x, fluid.y);
 	ctx.strokeStyle = "lightgreen";
 	ctx.stroke();
-	
+	for(i = 0; i < fluid.turns.length-1; i++)
+	{
+		ctx.moveTo(fluid.turns[i].x, fluid.turns[i].y);
+		ctx.lineTo(fluid.turns[i+1].x, fluid.turns[i+1].y);
+		ctx.stroke();
+	}
+		ctx.arc(fluid.x, fluid.y, 10, 0, 2*Math.PI);
+	ctx.fill();
 	//Rendering objects on the board
 	for(var y = 0; y < 9; y++) {
 		for(var x = 0; x < 9; x++) {
