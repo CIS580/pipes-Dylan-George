@@ -23,7 +23,8 @@ function Game(screen, updateFunction, renderFunction) {
   this.backBuffer.width = screen.width;
   this.backBuffer.height = screen.height;
   this.backCtx = this.backBuffer.getContext('2d');
-
+  	
+	this.frontCtx.beginPath();
   // Start the game loop
   this.oldTime = performance.now();
   this.paused = false;
@@ -47,7 +48,6 @@ Game.prototype.loop = function(newTime) {
   var game = this;
   var elapsedTime = newTime - this.oldTime;
   this.oldTime = newTime;
-
   if(!this.paused) this.update(elapsedTime);
   this.render(elapsedTime, this.frontCtx);
 
